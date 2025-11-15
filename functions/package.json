@@ -1,0 +1,11 @@
+{
+  "name": "rebelvids-functions",
+  "engines": { "node": "20" },
+  "dependencies": {
+    "firebase-functions": "^4.7.0",
+    "firebase-admin": "^11.11.1",
+    "cors": "^2.8.5",
+    "axios": "^1.6.7",
+    "razorpay": "^2.9.4"
+  }
+}
