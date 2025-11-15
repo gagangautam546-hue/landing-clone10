@@ -9,8 +9,7 @@
   <link rel="stylesheet" href="styles.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
 </head>
-<body class="loading">
-  <div id="page-loader"><div class="spinner"></div></div>
+<body>
   <header class="topbar fixed">
     <div class="container header-inner">
       <div class="logo-small"><img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEg72dLQsTikwIUPO3SUMAILy1otx_2-tYliOzSNiKWQAHvevzOuH6p-fI-Ep9MMvtkbZXnwrAILLDLo9yBVgrIVRHl69BQiMMBSnZjL4w5L2kzZENmwqis6wie594T28-udOmCk6qPH5Qn-zP2fA1D6V8sz4gqdOMFEMUdrI-axhgW7uV0kfhhoqUa8u2S_/s1600/logo.png" alt="Rebelvids Academy logo" class="logo-img"></div>
@@ -81,33 +80,20 @@
   </script>
   <script>
     (function(){
-      var start = (window.performance && performance.now) ? performance.now() : Date.now();
-      var MIN = 1200;
-      function reallyHide(){
-        document.body.classList.remove('loading');
-        var l = document.getElementById('page-loader');
-        if(l){ setTimeout(function(){ l.style.display='none'; }, 320); }
-      }
-      function hideWithMinimum(){
-        var now = (window.performance && performance.now) ? performance.now() : Date.now();
-        var delta = now - start;
-        var wait = Math.max(0, MIN - delta);
-        setTimeout(reallyHide, wait);
-      }
-      if(document.readyState === 'complete') hideWithMinimum();
-      else window.addEventListener('load', hideWithMinimum);
-
       var autoSelectors = [
         '.hero-title','.hero-highlight','.sub','.primary-btn','.video-card',
         '.timeline-card','.center-badge','.compare-card','.pricing-card .left',
         '.pricing-card .right','.why-card','.faq-item','.site-footer .footer-left',
         '.site-footer .footer-cols .col'
       ];
+      var variants = ['fade-up','fade-right','fade-left','fade-down'];
+      var idx = 0;
       autoSelectors.forEach(function(sel){
-        document.querySelectorAll(sel).forEach(function(el,i){
+        document.querySelectorAll(sel).forEach(function(el){
           if(!el.hasAttribute('data-reveal')){
-            el.setAttribute('data-reveal','fade-up');
-            el.style.setProperty('--reveal-delay', (i*80)+'ms');
+            el.setAttribute('data-reveal', variants[idx % variants.length]);
+            el.style.setProperty('--reveal-delay', ((idx%6)*80)+'ms');
+            idx++;
           }
         });
       });
