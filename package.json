@@ -1,0 +1,11 @@
+{
+  "name": "landing-clone10",
+  "private": true,
+  "type": "commonjs",
+  "version": "1.0.0",
+  "description": "Razorpay serverless integration for product checkout",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "razorpay": "^2.9.4"
+  }
+}

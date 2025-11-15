@@ -145,6 +145,7 @@
       </section>
     </div>
   </main>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   <script>
     (function(){
       var sels=['.section-title','#product-image-container','#product-main-image','#product-price-container','#add-to-cart-btn','#buy-now-btn'];
@@ -594,29 +595,64 @@
         relatedContainer.innerHTML = '<p style="color:var(--muted)">No related products found.</p>';
       }
 
-      // Set Buy Now to use backend-created Razorpay link with product price; fallback to existing link or download link
+      // Set Buy Now to use Razorpay Checkout with serverless order creation and verification
       document.getElementById('buy-now-btn').onclick = async function(e){
         e.preventDefault();
         if(!requireLogin('buy this product')) return;
         try{
-          if(product && product.paymentLink){ window.location.href = product.paymentLink; return; }
+          const qty = parseInt(document.getElementById('product-qty').value)||1;
           const amountNum = parseFloat(product && product.price ? product.price : '0');
-          const redirectUrl = (product && product.buyLink && product.buyLink !== '#') ? product.buyLink : window.location.href;
           if(!Number.isFinite(amountNum) || amountNum <= 0){ alert('Invalid product price.'); return; }
-          const resp = await fetch('https://asia-south1-rebelvids-academy.cloudfunctions.net/createPaymentLink',{
+          const paise = Math.round(amountNum * 100) * qty;
+          const notes = {
+            productId: product.id || (new URLSearchParams(location.search)).get('id') || '',
+            downloadLink: (product && product.a_link) ? product.a_link : (product && product.buyLink ? product.buyLink : ''),
+            title: product.title || ''
+          };
+          const createRes = await fetch('/api/create-order',{
             method:'POST',
             headers:{'Content-Type':'application/json'},
-            body: JSON.stringify({ title: product.title, amount: amountNum, currency:'INR', redirectUrl })
+            body: JSON.stringify({ amount: paise/100, currency:'INR', notes, title: product.title || '' })
           });
-          if(resp.ok){
-            const data = await resp.json();
-            if(data && data.short_url){ window.location.href = data.short_url; return; }
-          }
-          if(product && product.buyLink && product.buyLink !== '#'){ window.location.href = product.buyLink; return; }
-          alert('Payment link not available for this product yet.');
-        }catch(_){
-          if(product && product.buyLink && product.buyLink !== '#'){ window.location.href = product.buyLink; return; }
-          alert('Payment link could not be created at the moment. Please try again later.');
+          if(!createRes.ok){ throw new Error('Failed to create order'); }
+          const createData = await createRes.json();
+          const options = {
+            key: createData.keyId,
+            amount: createData.amount,
+            currency: createData.currency||'INR',
+            name: 'Rebelvids Academy',
+            description: product.title || 'Order',
+            order_id: createData.orderId,
+            handler: async function (response){
+              try{
+                const verifyRes = await fetch('/api/verify-payment',{
+                  method:'POST',
+                  headers:{'Content-Type':'application/json'},
+                  body: JSON.stringify({
+                    razorpay_order_id: response.razorpay_order_id,
+                    razorpay_payment_id: response.razorpay_payment_id,
+                    razorpay_signature: response.razorpay_signature
+                  })
+                });
+                const verifyData = await verifyRes.json();
+                if(verifyRes.ok && verifyData && verifyData.ok){
+                  const to = verifyData.redirectUrl || notes.downloadLink || window.location.href;
+                  window.location.href = to;
+                } else {
+                  alert('Payment verification failed.');
+                }
+              }catch(err){
+                console.error(err);
+                alert('Payment verification failed.');
+              }
+            },
+            theme: { color: '#0ea5ff' }
+          };
+          const rzp = new Razorpay(options);
+          rzp.open();
+        }catch(err){
+          console.error(err);
+          alert('Payment could not be initiated at the moment. Please try again later.');
         }
       };
       // Add to Cart functionality
