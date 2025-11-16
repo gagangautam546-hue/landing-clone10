@@ -641,7 +641,10 @@
                     const sessId = JSON.parse(localStorage.getItem(SESSION_KEY)||'null');
                     let users = [];
                     try{ users = await getUsers(); }catch(_){ users = []; }
-                    const me = users.find(u=>u.id===sessId) || null;
+                    let me = users.find(u=>u.id===sessId) || null;
+                    if(!me){
+                      try{ const lsUsers = JSON.parse(localStorage.getItem('rva_users')||'[]'); me = lsUsers.find(u=>u.id===sessId) || null; }catch(_){ }
+                    }
                     if(me){
                       const setPurchased = new Set(Array.isArray(me.purchased)? me.purchased : []);
                       setPurchased.add(product.id);
