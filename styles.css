@@ -98,12 +98,9 @@ body{padding-top:84px}
 .courses .section-title{text-align:center;font-size:28px;margin:0 0 26px;font-weight:800}
 .courses-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
 .course-card{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));border-radius:14px;padding:0;overflow:hidden;border:2px solid #0b3a60;box-shadow:0 6px 28px rgba(0,0,0,0.6)}
-.course-card .thumb{height:140px;overflow:hidden;background:linear-gradient(180deg,#08263a,#0b2b48);position:relative;display:flex;align-items:center;justify-content:center;padding:8px}
+.course-card .thumb{height:236px;overflow:hidden;background:linear-gradient(180deg,#08263a,#0b2b48);position:relative;display:flex;align-items:center;justify-content:center;padding:8px}
 .course-card .thumb img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;display:block;transition:transform .24s ease}
 
-@media (max-width:767px){
-  .course-card .thumb{height:180px}
-}
 .card-body{padding:16px}
 .card-body h3{margin:0 0 8px;font-size:18px}
 .card-body p{margin:0;color:var(--muted);font-size:14px;line-height:1.4}
