@@ -45,6 +45,9 @@
           </div>
         </div>
         <label class="modal-label full">Description<textarea id="a_desc" placeholder="Short description" style="height:100px;padding:12px;border-radius:8px"></textarea></label>
+        <label class="modal-label full">Preview embed code (optional)
+          <textarea id="a_preview" placeholder="Paste YouTube/Vimeo embed code here (iframe)" style="height:90px;padding:12px;border-radius:8px"></textarea>
+        </label>
         <div class="admin-form-row">
           <label class="modal-label">Price<input id="a_price" type="number" step="0.01" placeholder="9.99" required></label>
           <label class="modal-label">Category
@@ -110,6 +113,7 @@
       const t = document.getElementById('a_title'); if(t) t.value = item.title || '';
       const iu = document.getElementById('a_image'); if(iu) iu.value = (item.image && !item.image.startsWith('data:')) ? item.image : '';
       const d = document.getElementById('a_desc'); if(d) d.value = item.description || '';
+      const pv = document.getElementById('a_preview'); if(pv) pv.value = item.previewEmbed || '';
       const p = document.getElementById('a_price'); if(p) p.value = item.price || '';
       const c = document.getElementById('a_category'); if(c) c.value = item.category || 'Courses';
       const op = document.getElementById('a_original_price'); if(op) op.value = item.originalPrice || '';
@@ -251,6 +255,7 @@
         const items = getItems();
         const link = document.getElementById('a_link').value.trim();
         const buyLink = document.getElementById('a_buylink').value.trim();
+        const previewEmbed = document.getElementById('a_preview').value.trim();
         const item = { 
           id: CURRENT_EDIT_ID || Date.now().toString(), 
           title, 
@@ -260,6 +265,7 @@
           category, 
           link: link || '', 
           buyLink: buyLink || '',
+          previewEmbed: previewEmbed || '',
           originalPrice: originalPrice || '',
           discountPercent: discountPercent || ''
         };

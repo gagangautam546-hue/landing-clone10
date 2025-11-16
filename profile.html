@@ -150,15 +150,14 @@
         const myCart = cart.filter(c=>c.userId===me.id);
         const userCartCount = myCart.reduce((s,i)=>s+(i.qty||1),0) || 0;
 
-        // purchases: stored on user as purchases (number) and optionally a purchasesList in user.purchased (array of item ids)
-        const purchasedIds = (me.purchased && Array.isArray(me.purchased)) ? me.purchased : [];
-        const purchasedItems = purchasedIds.map(id=> items.find(x=>x.id===id)).filter(Boolean);
+        // purchases: load from Firebase orders for this user
+        const DB_URL = 'https://rebelvids-academy-default-rtdb.firebaseio.com';
 
         box.innerHTML = `
           <h3>${me.name}</h3>
           <p style="color:var(--muted)">${me.email}</p>
           <p style="margin-top:12px">Products in cart: <strong id="cart-count">${userCartCount}</strong></p>
-          <p>Total purchases: <strong id="purchase-count">${(purchasedItems.length) || (me.purchases||0)}</strong></p>
+          <p>Total purchases: <strong id="purchase-count">${me.purchases||0}</strong></p>
 
           <div style="margin-top:12px;display:flex;gap:10px;align-items:center">
             <label style="flex:1">Edit name<input id="edit-name" type="text" value="${me.name}" style="width:100%;padding:8px;border-radius:8px;margin-top:6px"></label>
@@ -215,25 +214,44 @@
           };
         }
 
-        // render purchases
+        // render purchases from Firebase
         const purchaseList = document.getElementById('purchase-list');
-        if(purchasedItems.length===0) purchaseList.innerHTML = '<p style="color:var(--muted)">No purchases yet.</p>';
-        else{
-          purchaseList.innerHTML = purchasedItems.map(i=>{
-            return `<div class="purchase-item" data-id="${i.id}" style="display:flex;gap:12px;align-items:center;padding:8px;border-radius:8px;background:rgba(255,255,255,0.02);margin-bottom:8px">
-              <img src="${i.image||'assets/logo-placeholder.png'}" style="width:64px;height:48px;object-fit:cover;border-radius:6px;flex-shrink:0">
-              <div style="flex:1"><strong>${i.title}</strong><div style="color:var(--muted)">₹${i.price||'0'}</div></div>
-            </div>`;
-          }).join('');
-
-          // delegate navigation on purchase item click
-          purchaseList.onclick = function(e){
-            const item = e.target.closest && e.target.closest('.purchase-item');
-            if(!item) return;
-            const pid = item.getAttribute('data-id');
-            if(pid){ window.location.href = `product-details.html?id=${pid}`; }
-          };
-        }
+        (async function(){
+          try{
+            const [ordersRes, productsRes] = await Promise.all([
+              fetch(`${DB_URL}/orders.json`),
+              items.length ? Promise.resolve({ ok:true, json: async()=>Object.fromEntries(items.map(p=>[p.id, p])) }) : fetch(`${DB_URL}/products.json`)
+            ]);
+            if(!ordersRes.ok) { purchaseList.innerHTML = '<p style="color:var(--muted)">No purchases yet.</p>'; return; }
+            const ordersData = await ordersRes.json();
+            const productsData = await productsRes.json();
+            const orders = ordersData && typeof ordersData==='object' ? Object.keys(ordersData).map(k=>({ id:k, ...ordersData[k] })) : [];
+            const myOrders = orders.filter(o=> o && (o.userId===me.id || o.userID===me.id));
+            if(!myOrders.length){ purchaseList.innerHTML = '<p style="color:var(--muted)">No purchases yet.</p>'; document.getElementById('purchase-count').textContent = '0'; return; }
+            const productMap = productsData && typeof productsData==='object' ? productsData : {};
+            const rows = myOrders.map(o=>{
+              const prod = productMap[o.productId] || items.find(x=>x.id===o.productId) || {};
+              const title = o.productTitle || prod.title || 'Purchased Item';
+              const image = (prod && prod.image) || 'assets/logo-placeholder.png';
+              const price = o.amount || prod.price || '0';
+              const link = o.downloadLink || prod.link || prod.buyLink || '#';
+              const safeLink = link && typeof link==='string' ? link : '#';
+              return `<div class="purchase-item" data-id="${o.productId||''}" style="display:flex;gap:12px;align-items:center;padding:8px;border-radius:8px;background:rgba(255,255,255,0.02);margin-bottom:8px">
+                <img src="${image}" style="width:64px;height:48px;object-fit:cover;border-radius:6px;flex-shrink:0">
+                <div style="flex:1">
+                  <strong>${title}</strong>
+                  <div style="color:var(--muted)">₹${price}</div>
+                  <div style="margin-top:6px"><a href="${safeLink}" target="_blank" rel="noopener" class="secondary-btn" style="padding:6px 10px;border-radius:10px">Download again</a></div>
+                </div>
+              </div>`;
+            }).join('');
+            purchaseList.innerHTML = rows;
+            document.getElementById('purchase-count').textContent = String(myOrders.length);
+          }catch(e){
+            purchaseList.innerHTML = '<p style="color:var(--muted)">No purchases yet.</p>';
+            document.getElementById('purchase-count').textContent = '0';
+          }
+        })();
 
         // save name
         document.getElementById('save-name').addEventListener('click', function(){

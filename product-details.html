@@ -57,7 +57,7 @@
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-bottom:60px">
         <!-- Left: Product Image -->
         <div id="product-image-container" style="background:linear-gradient(180deg,#041526,#031322);border-radius:16px;padding:40px;border:2px solid rgba(11,58,96,0.6);position:relative;min-height:400px;display:flex;align-items:center;justify-content:center">
-          <div style="position:relative;width:100%;max-width:500px">
+          <div id="media-wrap" style="position:relative;width:100%;max-width:500px">
             <img id="product-main-image" src="" alt="Product" style="width:100%;height:auto;border-radius:12px">
             <button id="play-video-btn" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.7);border:none;border-radius:50%;width:80px;height:80px;cursor:pointer;display:none;align-items:center;justify-content:center">
               <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -377,6 +377,9 @@
     .product-tab.active{color:#0ea5ff;border-bottom-color:#0ea5ff}
     .tab-content{min-height:200px;padding:20px 0}
     #product-image-container img{max-width:100%;height:auto;object-fit:contain}
+    /* Responsive video embed */
+    .embed-responsive{position:relative;width:100%;padding-top:56.25%;border-radius:12px;overflow:hidden}
+    .embed-responsive iframe,.embed-responsive video{position:absolute;inset:0;width:100%;height:100%;border:0}
     @media (max-width:768px){
       .page > .container > div:first-of-type{grid-template-columns:1fr !important;gap:24px !important}
       #product-price-container{flex-direction:column;align-items:flex-start !important}
@@ -566,9 +569,23 @@
       document.getElementById('product-title').textContent = product.title;
       document.getElementById('breadcrumb-title').textContent = product.title;
       document.getElementById('breadcrumb-category').textContent = product.category || 'Product';
-      document.getElementById('product-main-image').src = product.image;
-      document.getElementById('product-main-image').alt = product.title;
+      const mainImgEl = document.getElementById('product-main-image');
+      const mediaWrap = document.getElementById('media-wrap');
+      const playBtn = document.getElementById('play-video-btn');
+      mainImgEl.src = product.image;
+      mainImgEl.alt = product.title;
       document.getElementById('product-description').textContent = product.description || 'No description available.';
+      // Handle preview embed
+      function injectPreview(){
+        if(!product.previewEmbed) return;
+        mediaWrap.innerHTML = `<div class="embed-responsive">${product.previewEmbed}</div>`;
+      }
+      if(product.previewEmbed){
+        playBtn.style.display = 'flex';
+        playBtn.addEventListener('click', function(e){ e.preventDefault(); injectPreview(); });
+        mainImgEl.style.cursor = 'pointer';
+        mainImgEl.addEventListener('click', function(e){ e.preventDefault(); injectPreview(); });
+      }
       
       // Set price
       const priceEl = document.getElementById('product-price');
