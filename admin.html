@@ -79,6 +79,8 @@
       <div id="admin-list" class="admin-list" style="margin-bottom:80px"></div>
   <h3 class="section-title" style="font-size:18px;margin-top:8px">Registered Users</h3>
   <div id="admin-users" style="margin-bottom:80px"></div>
+  <h3 class="section-title" style="font-size:18px;margin-top:8px">Orders</h3>
+  <div id="admin-orders" style="margin-bottom:80px"></div>
     </div>
   </main>
 
@@ -317,7 +319,10 @@
   // Render users list and login stats
   function getUsers(){ try{return JSON.parse(localStorage.getItem('rva_users')||'[]')}catch(e){return[]} }
   function renderUsers(){ const box = document.getElementById('admin-users'); const users = getUsers(); if(!box) return; if(!users.length){ box.innerHTML = '<p style="color:var(--muted)">No registered users yet.</p>'; return; } const loggedInCount = users.filter(u=>u.loginCount && u.loginCount>0).length; box.innerHTML = `<p style="color:var(--muted)">Total users: <strong>${users.length}</strong> — Logged in at least once: <strong>${loggedInCount}</strong></p>`; const ul = document.createElement('div'); ul.style.display='grid'; ul.style.gridTemplateColumns='repeat(auto-fill,minmax(220px,1fr))'; ul.style.gap='12px'; users.forEach(u=>{ const c = document.createElement('article'); c.className='admin-item'; c.innerHTML = `<h3>${u.name}</h3><p style="color:var(--muted)">${u.email}</p><p style="font-weight:800">Logins: ${u.loginCount||0}</p>`; ul.appendChild(c); }); box.appendChild(ul); }
+  function getOrders(){ try{return JSON.parse(localStorage.getItem('rva_orders')||'[]')}catch(e){return[]} }
+  function renderOrders(){ const box = document.getElementById('admin-orders'); if(!box) return; const orders = getOrders().slice().reverse(); if(!orders.length){ box.innerHTML = '<p style="color:var(--muted)">No orders yet.</p>'; return; } let html=''; html += '<div style="overflow:auto">'; html += '<table style="width:100%;border-collapse:collapse">'; html += '<thead><tr><th style="text-align:left;padding:8px;border-bottom:1px solid rgba(255,255,255,0.1)">User</th><th style="text-align:left;padding:8px;border-bottom:1px solid rgba(255,255,255,0.1)">Email</th><th style="text-align:left;padding:8px;border-bottom:1px solid rgba(255,255,255,0.1)">Product</th><th style="text-align:left;padding:8px;border-bottom:1px solid rgba(255,255,255,0.1)">Qty</th><th style="text-align:left;padding:8px;border-bottom:1px solid rgba(255,255,255,0.1)">Amount</th><th style="text-align:left;padding:8px;border-bottom:1px solid rgba(255,255,255,0.1)">PaymentId</th><th style="text-align:left;padding:8px;border-bottom:1px solid rgba(255,255,255,0.1)">Time</th></tr></thead>'; html+='<tbody>'; orders.forEach(o=>{ const when=new Date(o.ts||Date.now()).toLocaleString(); html+=`<tr><td style="padding:8px;border-bottom:1px solid rgba(255,255,255,0.06)">${o.userName||o.userId||''}</td><td style="padding:8px;border-bottom:1px solid rgba(255,255,255,0.06)">${o.userEmail||''}</td><td style="padding:8px;border-bottom:1px solid rgba(255,255,255,0.06)">${o.title||o.productId||''}</td><td style=\"padding:8px;border-bottom:1px solid rgba(255,255,255,0.06)\">${o.qty||1}</td><td style=\"padding:8px;border-bottom:1px solid rgba(255,255,255,0.06)\">₹${o.amount||0} ${o.currency||''}</td><td style=\"padding:8px;border-bottom:1px solid rgba(255,255,255,0.06)\">${o.paymentId||''}</td><td style=\"padding:8px;border-bottom:1px solid rgba(255,255,255,0.06)\">${when}</td></tr>`; }); html+='</tbody></table></div>'; box.innerHTML = html; }
   renderUsers();
+  renderOrders();
     });
   </script>
 </body>

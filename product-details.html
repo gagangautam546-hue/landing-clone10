@@ -636,6 +636,48 @@
                 });
                 const verifyData = await verifyRes.json();
                 if(verifyRes.ok && verifyData && verifyData.ok){
+                  try{
+                    const SESSION_KEY = 'rva_session';
+                    const ORDERS_KEY = 'rva_orders';
+                    const sessId = JSON.parse(localStorage.getItem(SESSION_KEY)||'null');
+                    let users = [];
+                    try{ users = await getUsers(); }catch(_){ users = []; }
+                    const me = users.find(u=>u.id===sessId) || null;
+                    if(me){
+                      const setPurchased = new Set(Array.isArray(me.purchased)? me.purchased : []);
+                      setPurchased.add(product.id);
+                      const updatedUser = { ...me, purchased: Array.from(setPurchased) };
+                      try{ await saveUser(updatedUser); }catch(_){}
+                      try{
+                        let lsUsers = [];
+                        try{ lsUsers = JSON.parse(localStorage.getItem('rva_users')||'[]'); }catch(_){ lsUsers = []; }
+                        const idx = lsUsers.findIndex(u=>u.id===updatedUser.id);
+                        if(idx>=0) lsUsers[idx] = updatedUser; else lsUsers.push(updatedUser);
+                        localStorage.setItem('rva_users', JSON.stringify(lsUsers));
+                      }catch(_){}
+                    }
+                    try{
+                      const qty = parseInt(document.getElementById('product-qty').value)||1;
+                      const orderObj = {
+                        id: response.razorpay_order_id,
+                        paymentId: response.razorpay_payment_id,
+                        userId: me ? me.id : sessId,
+                        userName: me ? me.name : '',
+                        userEmail: me ? me.email : '',
+                        productId: product.id,
+                        title: product.title || '',
+                        amount: (Number(product.price)||0) * qty,
+                        currency: createData.currency||'INR',
+                        qty: qty,
+                        ts: Date.now()
+                      };
+                      let orders = [];
+                      try{ orders = JSON.parse(localStorage.getItem(ORDERS_KEY)||'[]'); }catch(_){ orders = []; }
+                      orders.push(orderObj);
+                      localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+                      window.dispatchEvent(new Event('storage'));
+                    }catch(_){}
+                  }catch(_){}
                   const to = verifyData.redirectUrl || notes.downloadLink || window.location.href;
                   window.location.href = to;
                 } else {
