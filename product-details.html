@@ -606,7 +606,7 @@
           const paise = Math.round(amountNum * 100) * qty;
           const notes = {
             productId: product.id || (new URLSearchParams(location.search)).get('id') || '',
-            downloadLink: (product && product.a_link) ? product.a_link : (product && product.buyLink ? product.buyLink : ''),
+            downloadLink: (product && product.link) ? product.link : (product && product.buyLink ? product.buyLink : ''),
             title: product.title || ''
           };
           const createRes = await fetch('/api/create-order',{
