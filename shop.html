@@ -321,7 +321,7 @@
             </div>
           `;
         }
-        return `\n<article class="course-card" data-id="${item.id}">\n  <div class="thumb">${item.link ? `<a href="${item.link}" target="_blank" rel="noopener">` : ''}<img src="${item.image}" alt="${item.title}">${item.link ? '</a>' : ''}</div>\n  <div class="card-body">\n    <h3>${item.title}</h3>\n    <div style=\"display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap\">\n      <button class=\"primary-btn buy-now-btn\" data-id=\"${item.id}\" style=\"border:none;cursor:pointer\">Buy Now</button>\n      <button class=\"ghost-btn add-cart\" data-id=\"${item.id}\">Add to Cart</button>\n      ${priceHtml}\n    </div>\n  </div>\n</article>`;
+        return `\n<article class="course-card" data-id="${item.id}">\n  <div class="thumb">${item.link ? `<a href="${item.link}" target="_blank" rel="noopener">` : ''}<img src="${item.image}" alt="${item.title}" style="width:100%;height:220px;object-fit:contain">${item.link ? '</a>' : ''}</div>\n  <div class="card-body">\n    <h3>${item.title}</h3>\n    <div style=\"display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap\">\n      <button class=\"primary-btn buy-now-btn\" data-id=\"${item.id}\" style=\"border:none;cursor:pointer\">Buy Now</button>\n      <button class=\"ghost-btn add-cart\" data-id=\"${item.id}\">Add to Cart</button>\n      ${priceHtml}\n    </div>\n  </div>\n</article>`;
       }
       function checkLogin(){
         try{
