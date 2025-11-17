@@ -174,8 +174,8 @@
         // Open WhatsApp with prefilled details
         const waPhone = '918433074577'; // digits only
         const waText = `New schedule request:\nName: ${data.name}\nMobile: ${data.mobile}\nDate: ${data.date}\nTime: ${data.time}`;
-        const waUrl = `https://wa.me/${waPhone}?text=${encodeURIComponent(waText)}`;
-        window.open(waUrl, '_blank');
+        const waUrl = `https://api.whatsapp.com/send?phone=${waPhone}&text=${encodeURIComponent(waText)}`;
+        window.location.href = waUrl;
 
         // Optional: simulate a POST request (no real backend) — commented out by default
         /*

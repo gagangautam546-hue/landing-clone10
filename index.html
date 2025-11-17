@@ -794,9 +794,9 @@ Our support team responds within 24 hours and ensures every issue is resolved q
           console.log('Schedule a Call submitted (local):', data);
 
           // Open WhatsApp web/app with prefilled message. This opens a new tab that loads WhatsApp.
-          // Using wa.me format: https://wa.me/<number>?text=<encoded text>
-          const waUrl = `https://wa.me/${waPhone}?text=${encodeURIComponent(`New schedule request:\nName: ${data.name}\nMobile: ${data.mobile}\nDate: ${data.date}\nTime: ${data.time}`)}`;
-          window.open(waUrl, '_blank');
+          // Using api.whatsapp.com format for broader compatibility
+          const waUrl = `https://api.whatsapp.com/send?phone=${waPhone}&text=${encodeURIComponent(`New schedule request:\nName: ${data.name}\nMobile: ${data.mobile}\nDate: ${data.date}\nTime: ${data.time}`)}`;
+          window.location.href = waUrl;
 
           // Close modal after a short delay
           setTimeout(close, 900);
